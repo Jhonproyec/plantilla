@@ -1,0 +1,157 @@
+<div class="page-container">
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-info">
+                <h1>Pedidos Pendientes</h1>
+                <p>Gestión de pedidos pendientes de entregar</p>
+            </div>
+            @if (user?.role == 'ADMIN') {
+                <button mat-raised-button class="btn btn-primary" (click)="openCreatePedido(null)">
+                    <mat-icon>add</mat-icon>
+                    <span>
+                        Nuevo Pedido
+                    </span>
+                </button>
+            }
+        </div>
+    </div>
+
+    <mat-card class="custom-card">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>pending_actions</mat-icon>
+                Listado Pedidos Pendientes
+            </mat-card-title>
+            <input type="search" placeholder="Buscar..." class="search" [formControl]="searchControl">
+
+        </mat-card-header>
+        <div class="table-container">
+            <table mat-table [dataSource]="dataSource" class="custom-table">
+
+                <!-- Columna Fecha -->
+                <ng-container matColumnDef="date">
+                    <th mat-header-cell *matHeaderCellDef class="col-date">Fecha</th>
+                    <td mat-cell class="col-date" *matCellDef="let pedido">{{ pedido.orderDate | date:'dd-MM-yyyy' }}
+                    </td>
+                </ng-container>
+
+                <!-- Columna Nombre -->
+                <ng-container matColumnDef="origin">
+                    <th mat-header-cell *matHeaderCellDef>Origen</th>
+                    <td mat-cell *matCellDef="let pedido">{{ pedido.orderType }}</td>
+                </ng-container>
+                <ng-container matColumnDef="company">
+                    <th mat-header-cell *matHeaderCellDef>Origen</th>
+                    <td mat-cell *matCellDef="let pedido">{{ pedido.company.nameCompany }}</td>
+                </ng-container>
+                <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>Nombre</th>
+                    <td mat-cell *matCellDef="let pedido">{{ pedido.fullName }}</td>
+                </ng-container>
+                <ng-container matColumnDef="address">
+                    <th mat-header-cell *matHeaderCellDef>Dirección</th>
+                    <td mat-cell *matCellDef="let pedido">{{pedido.address}}, {{pedido.municipality.departament.name}}
+                        {{pedido.municipality.name}}</td>
+                </ng-container>
+                <ng-container matColumnDef="details">
+                    <th mat-header-cell *matHeaderCellDef>Detalle Pedido</th>
+                    <td mat-cell *matCellDef="let pedido">{{pedido.orderDetails}}</td>
+                </ng-container>
+                <ng-container matColumnDef="payment">
+                    <th mat-header-cell *matHeaderCellDef>Tipo Pago</th>
+                    <td mat-cell *matCellDef="let pedido">{{pedido.paymentType}}</td>
+                </ng-container>
+                <ng-container matColumnDef="total">
+                    <th mat-header-cell *matHeaderCellDef>Total</th>
+                    <td mat-cell *matCellDef="let pedido">{{pedido.paymentAmount}}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                    <td mat-cell *matCellDef="let pedido">
+                        <button mat-icon-button [matMenuTriggerFor]="userMenu" class="actions-btn">
+                            <mat-icon>more_vert</mat-icon>
+                        </button>
+                        <mat-menu #userMenu="matMenu">
+                            <button mat-menu-item (click)="generateTicket(pedido.idOrder)">
+                                <mat-icon>print</mat-icon>
+                                <span>Imprimir</span>
+                            </button>
+                            <button mat-menu-item (click)="markSend(pedido.idOrder)">
+                                <mat-icon>done</mat-icon>
+                                <span>Enviado</span>
+                            </button>
+                            @if(user.role == 'ADMIN'){
+                                <button mat-menu-item (click)="openCreatePedido(pedido)">
+                                    <mat-icon>edit</mat-icon>
+                                    <span>Editar</span>
+                                </button>
+                                <button mat-menu-item class="delete-action" (click)="deletePedido(pedido)">
+                                    <mat-icon>delete</mat-icon>
+                                    <span>Eliminar</span>
+                                </button>
+                            }
+                        </mat-menu>
+                    </td>
+                </ng-container>
+                <!-- Header y Row -->
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+            @if(dataSource.data.length > 0){
+            <mat-paginator [length]="totalOrders" [pageSize]="pageSize" [pageSizeOptions]="[5,10,20]"
+                (page)="onPageChange($event)">
+            </mat-paginator>
+            }@else {
+
+            <div class="empty_table">
+                No se encontraron registros
+            </div>
+            }
+
+        </div>
+    </mat-card>
+</div>
+
+<div class="container">
+    <!-- MODAL PARA MOSTRAR EL TICKET -->
+    @if(showTicketModal){
+
+    }
+    <div class="modal-overlay" *ngIf="showTicketModal" (click)="closeModal($event)">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <!-- Header del modal -->
+            <div class="modal-header">
+                <h2>🎫 Ticket Generado</h2>
+                <button class="close-btn" (click)="closeModal()" title="Cerrar">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Contenido del modal - Imagen del ticket -->
+            <div class="modal-body">
+                <div class="ticket-container">
+                    <img [src]="ticketImage" alt="Ticket generado" class="ticket-image" id="ticketImage">
+                </div>
+            </div>
+
+            <!-- Footer del modal - Botones de acción -->
+            <div class="modal-footer">
+                <button class="btn btn-success" (click)="printTicket()">
+                    🖨️ Imprimir
+                </button>
+                <button class="btn btn-info" (click)="downloadTicket()">
+                    💾 Descargar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading spinner -->
+    <div class="loading-overlay" *ngIf="isGeneratingTicket">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Generando ticket...</p>
+        </div>
+    </div>
+</div>

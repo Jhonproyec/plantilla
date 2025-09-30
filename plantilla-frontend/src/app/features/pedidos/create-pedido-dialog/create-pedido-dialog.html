@@ -1,0 +1,161 @@
+<div class="dialog-container">
+    <div class="dialog-header">
+        <h2 mat-dialog-title>
+            <mat-icon class="header-icon">shopping_cart</mat-icon>
+            Agregar Nuevo Pedido
+        </h2>
+        <button mat-icon-button mat-dialog-close class="close-button">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <mat-dialog-content class="dialog-content">
+        <form class="user-form" [formGroup]="formOrder">
+            <input type="hidden" formControlName="orderStatus">
+            <!-- FECHA -->
+            <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>NIT (opcional)</mat-label>
+                    <input formControlName="nit" matInput placeholder="Ej: 10643688-1">
+                </mat-form-field>
+            </div>
+            <div class="form-row">
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Fecha</mat-label>
+                    <input formControlName="orderDate" matInput [matDatepicker]="picker" placeholder="DD/MM/YYYY"
+                        readonly />
+                    <mat-error class="text-error">{{ getFieldError('orderDate') }}</mat-error>
+                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Origen</mat-label>
+                    <mat-select formControlName="orderType">
+                        <mat-option value="WHATSAPP">Whatsapp</mat-option>
+                        <mat-option value="META">Meta</mat-option>
+                    </mat-select>
+                    <mat-error class="text-error">{{ getFieldError('orderType') }}</mat-error>
+                </mat-form-field>
+            </div>
+
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Nombre completo</mat-label>
+                <input formControlName="fullName" matInput placeholder="Ej: juan.perez">
+                <mat-error class="text-error">{{ getFieldError('fullName') }}</mat-error>
+            </mat-form-field>
+
+            <div class="form-row">
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Departamento</mat-label>
+                    <mat-select formControlName="idDepartament" (selectionChange)="getMunicipalities($event)">
+                        @for (item of departaments; track $index) {
+                        <mat-option value="{{item.idDepartament}}">{{item.name}}</mat-option>
+                        }
+                    </mat-select>
+                    <mat-error class="text-error">{{ getFieldError('idDepartament') }}</mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Municipio</mat-label>
+                    <mat-select formControlName="idMunicipality">
+                        @for (item of municipalities; track $index) {
+                        <mat-option value="{{item.idMunicipality}}">{{item.name}}</mat-option>
+                        }
+                    </mat-select>
+                    <mat-error class="text-error">{{ getFieldError('idMunicipality') }}</mat-error>
+                </mat-form-field>
+            </div>
+            <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Dirección</mat-label>
+                    <input formControlName="address" matInput placeholder="3ra avenida 3-44">
+                    <mat-error class="text-error">{{ getFieldError('address') }}</mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="form-row">
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Teléfono Contácto</mat-label>
+                    <input formControlName="phone" matInput placeholder="38217898">
+                    <mat-error class="text-error">{{ getFieldError('phone') }}</mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Segundo Teléfono Contácto</mat-label>
+                    <input formControlName="phoneTwo" matInput placeholder="38217898">
+                    <mat-error class="text-error">{{ getFieldError('phoneTwo') }}</mat-error>
+                </mat-form-field>
+            </div>
+
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Pedido</mat-label>
+                <mat-chip-grid #chipGrid formControlName="orderDetails" class="orderDetails">
+                    @for (tag of orderTags; track $index) {
+                    <mat-chip-row (removed)="removeTag(tag)" [editable]="true">
+                        {{ tag }}
+                        <button matChipRemove>
+                            <mat-icon>cancel</mat-icon>
+                        </button>
+                    </mat-chip-row>
+                    }
+                </mat-chip-grid>
+                <input class="input-tags" placeholder="Agregar Pedidos" [matChipInputFor]="chipGrid"
+                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [disabled]="orderTags.length >= 6"
+                    (matChipInputTokenEnd)="addTag($event)" />
+                <mat-error class="text-error">{{ getFieldError('orderDetails') }}</mat-error>
+                @if(orderTags.length >= 6){
+                <mat-hint class="text-error">
+                    Máximo 6 pedidos alcanzados
+                </mat-hint>
+                }
+            </mat-form-field>
+            <div class="form-row">
+                <!-- Rol -->
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Tipo de Pago</mat-label>
+                    <mat-select formControlName="paymentType">
+                        <mat-option value="SOLO_ENTREGA">Solo Entrega</mat-option>
+                        <mat-option value="RECIBE_PAGO">Recibe Pago</mat-option>
+                    </mat-select>
+                    <mat-error class="text-error">{{ getFieldError('paymentType') }}</mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Empresa</mat-label>
+                    <mat-select formControlName="idCompany">
+                        @for (item of companies; track $index) {
+                        <mat-option value="{{item.idCompany}}">{{item.nameCompany}}</mat-option>
+                        }
+                    </mat-select>
+                    <mat-error class="text-error">{{ getFieldError('idCompany') }}</mat-error>
+                </mat-form-field>
+
+            </div>
+
+            <mat-form-field *ngIf="formOrder.get('paymentType')?.value === 'RECIBE_PAGO'" appearance="outline"
+                class="full-width">
+                <mat-label>Total</mat-label>
+                <input formControlName="paymentAmount" type="number" matInput placeholder="Total" />
+                <mat-error class="text-error">{{ getFieldError('paymentAmount') }}</mat-error>
+            </mat-form-field>
+
+        </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-button type="button" (click)="onCancel()" class="btn-cancel btn">
+            Cancelar
+        </button>
+        <button mat-raised-button class="btn btn-primary" type="button" (click)="saveOrder()"
+            [disabled]="formOrder.invalid || isLoading()">
+            @if(isLoading()){
+            <div class="text-loading">
+                <mat-spinner diameter="16" class="spinner"></mat-spinner>
+            </div>
+            }@else{
+            @if(pedido != null || pedido != undefined){
+            Editar Orden
+            }@else{
+            Crear Orden
+            }
+            }
+        </button>
+    </mat-dialog-actions>
+</div>

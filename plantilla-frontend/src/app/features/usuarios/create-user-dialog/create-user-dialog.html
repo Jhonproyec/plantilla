@@ -1,0 +1,102 @@
+<div class="dialog-container">
+    <div class="dialog-header">
+        <h2 mat-dialog-title>
+            <mat-icon class="header-icon">person_add</mat-icon>
+            Agreagar Nuevo Usuario
+        </h2>
+        <button mat-icon-button mat-dialog-close class="close-button">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <mat-dialog-content class="dialog-content">
+        <form [formGroup]="createUserForm" (ngSubmit)="onSubmit()" class="user-form">
+            <!-- Nombre y Apellido -->
+            <div class="form-row">
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Nombre</mat-label>
+                    <input matInput formControlName="firstName" placeholder="Ej: Juan">
+                    <mat-error class="text-error">{{ getFieldError('firstName') }}</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Apellido</mat-label>
+                    <input matInput formControlName="lastName" placeholder="Ej: Pérez">
+                    <mat-error class="text-error">{{ getFieldError('lastName') }}</mat-error>
+                </mat-form-field>
+            </div>
+
+            <!-- Email -->
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Correo Electrónico</mat-label>
+                <input matInput formControlName="email" type="email" placeholder="usuario@empresa.com">
+                <mat-icon matSuffix>email</mat-icon>
+                <mat-error class="text-error">{{ getFieldError('email') }}</mat-error>
+            </mat-form-field>
+
+            <!-- Contraseña -->
+             @if(user == null){
+                 <div class="form-row">
+                     <mat-form-field appearance="outline" class="half-width">
+                         <mat-label>Contraseña</mat-label>
+                         <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password"
+                             placeholder="Mínimo 8 caracteres">
+                         <button mat-icon-button matSuffix (click)="togglePasswordVisibility()" type="button">
+                             <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                         </button>
+                         <mat-error class="text-error">{{ getFieldError('password') }}</mat-error>
+                     </mat-form-field>
+                     <mat-form-field appearance="outline" class="half-width">
+                         <mat-label>Repetir Contraseña</mat-label>
+                         <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="repeatPassword"
+                             placeholder="Mínimo 8 caracteres">
+                         <button mat-icon-button matSuffix (click)="togglePasswordVisibility()" type="button">
+                             <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                         </button>
+                         <mat-error class="text-error">{{ getFieldError('repeatPassword') }}</mat-error>
+                     </mat-form-field>
+    
+                 </div>
+             }
+
+            <!-- Rol -->
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Rol</mat-label>
+                <mat-select formControlName="role">
+                    @for (role of roles; track role.value) {
+                    <mat-option [value]="role.value">{{ role.label }}</mat-option>
+                    }
+                </mat-select>
+                <mat-icon matSuffix>admin_panel_settings</mat-icon>
+                <mat-error class="text-error">{{ getFieldError('role') }}</mat-error>
+            </mat-form-field>
+
+            @if (error()) {
+            <div class="error-message">
+                <mat-icon>error</mat-icon>
+                {{ error() }}
+            </div>
+            }
+        </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-button type="button" (click)="onCancel()" class="btn-cancel btn">
+            Cancelar
+        </button>
+        <button mat-raised-button class="btn btn-primary" type="submit" (click)="onSubmit()"
+            [disabled]="createUserForm.invalid || isLoading()">
+            @if (isLoading()) {
+            <div class="text-loading">
+                <mat-spinner diameter="16" class="spinner"></mat-spinner>
+                <div> Creando...</div>
+            </div>
+            } @else {
+                @if(user){
+                    Editar Usuario
+                }@else{
+                    Crear Usuario
+                }
+            }
+        </button>
+    </mat-dialog-actions>
+</div>

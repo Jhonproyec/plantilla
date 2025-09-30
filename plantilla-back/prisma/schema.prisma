@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  SELLER
+}
+
+model User {
+  idUser    Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  firstName String
+  lastName  String
+  role      Role      @default(SELLER)
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  lastLogin DateTime? @map("last_login")
+
+  @@map("users")
+}
+
+model Departament {
+  idDepartament  Int            @id @default(autoincrement())
+  name           String
+  municipalities Municipality[]
+
+  @@index([name])
+}
+
+model Municipality {
+  idMunicipality Int    @id @default(autoincrement())
+  idDepartament  Int
+  name           String
+
+  departament Departament @relation(fields: [idDepartament], references: [idDepartament])
+
+  orders Order[]
+
+  @@index([name])
+  @@index([idDepartament])
+}
+
+model Company {
+  idCompany   Int     @id @default(autoincrement())
+  nameCompany String
+  orders      Order[]
+}
+
+model Order {
+  idOrder        Int          @id @default(autoincrement())
+  orderDate      DateTime
+  fullName       String
+  idMunicipality Int
+  municipality   Municipality @relation(fields: [idMunicipality], references: [idMunicipality])
+  orderDetails   String       @db.LongText
+  orderType      OrderType
+  paymentType    PaymentType
+  paymentAmount  Float
+  orderStatus    Int //0 pendiente, 1 entregado
+  phone          String
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  createdBy      Int
+  address        String?
+  idCompany      Int?
+  company        Company?     @relation(fields: [idCompany], references: [idCompany])
+  nit            String?
+  phoneTwo       String
+  printerTicker  Boolean @default(false)
+
+  @@index([orderDate]) // índice para reportes por fecha
+  @@index([orderStatus]) // índice para reportes por estado
+  @@index([orderType]) // índice para reportes por tipo de pedido
+  @@index([paymentType]) // índice para reportes por tipo de pago
+  @@index([idMunicipality]) // índice para filtrar por municipio
+  @@index([idCompany])
+}
+
+enum OrderType {
+  WHATSAPP
+  META
+}
+
+enum PaymentType {
+  SOLO_ENTREGA
+  RECIBE_PAGO
+}

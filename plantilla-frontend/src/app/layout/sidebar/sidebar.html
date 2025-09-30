@@ -1,0 +1,27 @@
+<div class="sidebar-container">
+    <div class="sidebar-header">
+        <div class="logo">
+            <img src="images/logo.png" alt="logo de la empresa">
+        </div>
+    </div>
+
+    <div class="sidebar-content">
+        <mat-nav-list class="nav-list">
+            @for (item of menuItems; track item.route) {
+            <mat-list-item class="nav-item" [class.active]="item.active" (click)="navigateTo(item.route)">
+                <mat-icon matListItemIcon class="nav-icon">{{ item.icon }}</mat-icon>
+                <span matListItemTitle class="nav-label">{{ item.label }}</span>
+                @if (item.active) {
+                <div class="active-indicator"></div>
+                }
+            </mat-list-item>
+            }
+        </mat-nav-list>
+    </div>
+    <div class="sidebar-footer">
+        <button mat-list-item class="logout-button" (click)="logout()">
+            <mat-icon matListItemIcon>exit_to_app</mat-icon>
+            <span matListItemTitle>Cerrar Sesión</span>
+        </button>
+    </div>
+</div>
